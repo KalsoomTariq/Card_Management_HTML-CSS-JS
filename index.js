@@ -13,6 +13,25 @@ $(document).ready(function()
       localStorage.removeItem('cards');
     
     });
+
+    const searchInput = document.querySelector("[data-search]");
+
+    searchInput.addEventListener("input",(e)=>{
+        const value = e.target.value;
+        console.log(value);
+        searchQuery = value.toLowerCase();
+        $("#cardList .col-md-3").each(function() {
+            var cardContent = $(this).text().toLowerCase();
+            console.log(cardContent);
+            if (cardContent.includes(searchQuery)) {
+              $(this).addClass('visible').removeClass('hidden');
+          } else {
+              $(this).addClass('hidden').removeClass('visible');
+          } 
+        })
+
+    });
+
     let addCardForm = document.getElementById("addCardForm");
     addCardForm.addEventListener("submit", async (e) => {
       e.preventDefault();

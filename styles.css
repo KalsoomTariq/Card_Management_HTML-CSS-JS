@@ -40,10 +40,40 @@
 
 #content{
     background-color: var(--primary-color); 
+    padding:1.5rem;
 }
 
+.search-wrapper{
+    flex-direction: column;
+}
+
+.search-wrapper label{
+    font-size: 2rem;
+}
+.search-wrapper input{
+    border: 5px solid var(--primary-color-dark);
+    background-color: var(--secondary-color-light);
+    text-align: center;
+    margin:1%;
+    border-radius: 5px;
+}
+.search-wrapper input:hover{
+    background-color: var(--primary-color);
+}
 .buttons{
     margin: 1% auto 1% auto;
+}
+
+.btn{
+    width: fit-content;
+}
+
+.visible {
+    display: block !important;
+}
+
+.hidden {
+    display: none !important; 
 }
 
 .card{

@@ -30,20 +30,28 @@
     </header>
 
     <div class="container-fluid" id="content">
-        <div class="row ">
-            <div class="col-md-6">
+        <div class="row align-items-center gy-5">
+            <div class="col col-md-4 col-sm-8 col-xs-12 col-xxs-12">
                 <h2 >Manage <b>Cards</b></h2>
             </div>
-            <div class="col-md-6 buttons">
-                <div class="float-end">
+
+            <div class="col col-md-4 col-sm-4 col-xs-12 col-xxs-12">
+                <div class="search-wrapper">
+                    <label for="search">Search Cards</label>
+                    <input type="search" id="search" data-search>
+                </div>
+            </div>
+
+            <div class="col col-md-4 col-sm-12 col-xs-12 col-xxs-12 buttons gx-5">
+                <div class="">
                 <button data-target="#addCardModal" class="btn btn-success " data-toggle="modal"><i class="material-icons icon">&#xE147;</i> <span>Add New Card</span></button>
                 <button data-target="#deleteAllCards" class="btn btn-danger " data-toggle="modal"><i class="material-icons icon">&#xE15C;</i> <span>Delete All Cards</span></button>						    
-                </div>
+            </div>
         </div>
 
         <div class="row gx-5" id="cardList">
 
-            <!-- <div class="col-md-3 col-sm-5" >
+            <!-- <div class="col-md-3 col-sm-5 " >
                 <div class="card">
                     <img class="card-img-top" src="./assets/pic.png" alt="Card image" >
                     <div class="card-body">
