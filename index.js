@@ -7,38 +7,188 @@ $(document).ready(function()
     ---------------------------------------------------------------------------------------
     ---------------------------------------------------------------------------------------
     */
+      // Default Themes
+      // localStorage.clear();
+      function populateDefaultThemes() {
+          var defaultThemes = [
+              {
+                  title: "Storm",
+                  fontName: "Aldrich",
+                  fontStyle: "normal",
+                  fontColor: "#82cef1",
+                  bgColor: "#162f35",
+                  backgroundType: 'image',
+                  backgroundImage: "./assets/storm.png",
+                  backgroundVideo: null,
+                  marginStyle: "solid"
+              },
+              {
+                  title: "Autumn",
+                  fontName: "Poor Story",
+                  fontStyle: "bold",
+                  fontColor: "#f3af60",
+                  bgColor: "#5e1f1f",
+                  backgroundType: 'image',
+                  backgroundImage: "./assets/autumn.png",
+                  backgroundVideo: null,
+                  marginStyle: "dashed"
+              },
+              {
+                  title: "Cat",
+                  fontName: "Henny Penny",
+                  fontStyle: "normal",
+                  fontColor: "#829c94",
+                  bgColor: "#27382c",
+                  backgroundType: 'image',
+                  backgroundImage: "./assets/cat.png",
+                  backgroundVideo: null,
+                  marginStyle: "dotted"
+              }
+          ];
+  
+          localStorage.setItem('themes', JSON.stringify(defaultThemes));
+      }
 
-    // Define themes
-    var themes = [
-      {
-          name: 'Cool',
-          fontName: 'Arial',
-          fontStyle: 'normal',
-          fontColor: '#000000',
-          bodyColor: '#ffffff',
-          backgroundColor: '#6495ED',
-          backgroundImage: 'none',
-          marginStyle: '10px'
-      },
-      {
-          name: 'Sad',
-          fontName: 'Verdana',
-          fontStyle: 'italic',
-          fontColor: '#000000',
-          bodyColor: '#f0f0f0',
-          backgroundColor: '#778899',
-          backgroundImage: 'none',
-          marginStyle: '15px'
-      },
-      // Add more predefined themes here
-  ];
+      // Check for default themes
+      if (!localStorage.getItem('themes')) {
+          populateDefaultThemes();
+      }
+  
+      // Create Theme Dropdown
+      function generateThemeDropdown() {
+          var themes = JSON.parse(localStorage.getItem('themes'));
+  
+          var dropdown = document.getElementById('themeDropdown');
+          dropdown.innerHTML = ''; 
+  
+          themes.forEach(function(theme, index) {
+              var option = document.createElement('option');
+              option.value = index;
+              option.text = theme.title;
+              dropdown.appendChild(option);
+          });
+      }
+      var themes = JSON.parse(localStorage.getItem('themes'));
+      var selectedThemeName = themes[0].title;
+      setSelectedTheme(selectedThemeName);
+  
+      // Show DropDown
+      generateThemeDropdown();
 
-  // Save themes to local storage
-  localStorage.setItem('themes', JSON.stringify(themes));
 
-  // Render theme dropdown
-  renderThemeDropdown();
 
+      // Function to set the selected theme and apply it automatically
+      function setSelectedTheme(themeName) {
+
+        // Retrieve themes from local storage
+        var themes = JSON.parse(localStorage.getItem('themes')) || [];
+        var themeIndex = themes.findIndex(function(theme) {
+            return theme.title == themeName;
+        });
+
+        if (themeIndex !== -1) {
+
+            // Apply the selected theme
+            selectedTheme = themes[themeIndex];
+            themes.splice(themeIndex, 1);
+            themes.unshift(selectedTheme)
+            localStorage.setItem('themes', JSON.stringify(themes));
+            generateThemeDropdown();
+            applyTheme(selectedTheme);
+        } 
+        else{
+            console.error('Selected theme not found.');
+        }
+      }
+  
+      // Apply Selected Theme
+      document.getElementById('themeDropdown').addEventListener('change', function() {
+          var selectedIndex = this.value;
+          var themes = JSON.parse(localStorage.getItem('themes'));
+          console.log(selectedIndex);
+          console.log(themes[selectedIndex].title);
+          setSelectedTheme(themes[selectedIndex].title);
+      });
+  
+      function applyTheme(theme) {
+
+          console.log(theme);
+          var video = document.getElementById('video');
+          var image = document.getElementById('image');
+
+          // Set background based on the theme's background type
+          if (theme.backgroundType == 'image') {
+              video.style.display = 'none'; 
+              image.style.display = 'block';
+              image.src = theme.backgroundImage;
+          } else if (theme.backgroundType =='video') {
+              video.style.display = 'block'; 
+              image.style.display = 'none'; 
+              video.src = theme.backgroundVideo;
+              video.load();
+          } else {
+              video.style.display = 'none'; 
+              image.style.display = 'none'; 
+          }
+
+
+          document.documentElement.style.setProperty('--font-new', theme.fontName);
+          document.documentElement.style.setProperty('--font-style', theme.fontStyle);
+          document.documentElement.style.setProperty('--primary-color-dark', theme.bgColor);
+          document.documentElement.style.setProperty('--secondary-color-light', theme.fontColor);
+          document.documentElement.style.setProperty('--border-style', theme.marginStyle);
+          
+      }
+
+      document.getElementById('customThemeForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        // Retrieve Theme Values
+        var themeTitle = document.getElementById('themeTitle').value;
+        var fontColor = document.getElementById('fontColor').value;
+        var bgColor = document.getElementById('bgColor').value;
+        var fontName = document.getElementById('fontName').value;
+        var fontStyle = document.getElementById('fontStyle').value;
+        var marginStyle = document.getElementById('marginStyle').value;
+        var bgImage = document.getElementById('bg').files[0]; // Image file
+        var bgVideo = document.getElementById('bg').files[0]; // Video file
+    
+        // Create theme object
+        var newTheme = {
+            title: themeTitle,
+            fontColor: fontColor,
+            bgColor: bgColor,
+            fontName: fontName,
+            fontStyle: fontStyle,
+            marginStyle: marginStyle,
+            backgroundType: bgImage ? 'image' : bgVideo ? 'video' : 'none',
+            backgroundImage: bgImage ? URL.createObjectURL(bgImage) : null,
+            backgroundVideo: bgVideo ? URL.createObjectURL(bgVideo) : null 
+        };
+    
+        // Add new theme to local storage
+        addThemeToLocalStorage(newTheme);
+    
+        // Close the modal
+        $('#createThemeModal').modal('hide');
+    
+        // Clear form inputs for next use
+        document.getElementById('customThemeForm').reset();
+    });
+    
+    function addThemeToLocalStorage(theme) {
+        // Retrieve existing themes from local storage or create an empty array
+        var themes = JSON.parse(localStorage.getItem('themes')) || [];
+    
+        // Add the new theme to the themes array
+        themes.push(theme);
+    
+        // Update themes array in local storage
+        localStorage.setItem('themes', JSON.stringify(themes));
+        generateThemeDropdown();
+    
+    }
+    
      /*
     ---------------------------------------------------------------------------------------
     ---------------------------------------------------------------------------------------
@@ -80,8 +230,11 @@ $(document).ready(function()
       var time = document.getElementById("time").value;
       var event = document.getElementById("event").value;
       var place = document.getElementById("place").value;
-      var image = $("#image").prop('files')[0]; 
+      var image = $("#cimage").prop('files')[0]; 
 
+      if(!image){
+        image = './assets/nopic.png';
+      }
       // Convert image to Base64 using asynchronous call
       var imageUrl= await getImageAsBase64(image);
 
@@ -110,7 +263,7 @@ $(document).ready(function()
       document.getElementById("time").value = '';
       document.getElementById("event").value = '';
       document.getElementById("place").value = '';
-      document.getElementById("image").value = '';
+      document.getElementById("cimage").value = '';
       // Close the modal Window
       $('#addCardModal').modal('hide');
 
@@ -122,8 +275,8 @@ $(document).ready(function()
     // Function that adds Card to UI
     function addCardToUI(card) {
 
-      cardHtml = `<div class="col-md-3 col-sm-5" data-id="${card.id}">
-      <div class="card" >
+      cardHtml = `<div class="col-md-3 col-sm-4 col-xs-6 col-xxs-12" data-id="${card.id}">
+      <div class="card w-75 h-100" >
           <img class="card-img-top" src="${card.imageUrl}" alt="Card image" >
           <div class="card-body">
               <h4 class="card-title"><b>${card.title}</b></h4>
@@ -133,8 +286,8 @@ $(document).ready(function()
               <span><p><b>Location:</b> ${card.place}</p></span>
               <p class="card-text heading"> <b>Desciption:</b>${card.description}</p>
               <div class="buttons">
-              <button class="btn btn-warning edit-card" data-id="${card.id}" data-target="#editCardModal" data-toggle="modal" >Edit Card</button>
-              <button class="btn btn-danger delete-card">Delete Card</button>
+              <button class="btn btn-sm btn-dark edit-card" data-id="${card.id}" data-target="#editCardModal" data-toggle="modal" >Edit Card</button>
+              <button class="btn btn-sm btn-dark delete-card">Delete Card</button>
               </div>
           </div>
       </div>
@@ -153,21 +306,30 @@ $(document).ready(function()
     }
   
     // Function that Converts image file in a base 64 format to be stored in Local Storage
-    function getImageAsBase64(file) {
+    function getImageAsBase64(input) {
       return new Promise((resolve, reject) => {
-        var reader = new FileReader();
-        
-        reader.onload = function() {
-          resolve(reader.result);
-        };
-        
-        reader.onerror = function(error) {
-          reject(error);
-        };
-        
-        reader.readAsDataURL(file);
-      });
-    }
+        if (typeof input === 'string') {
+            // If input is a string (file path), load the image as Blob
+            fetch(input)
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                })
+                .catch(reject);
+        } else if (input instanceof Blob) {
+            // If input is a Blob (file object), read the image as Data URL
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(input);
+        } else {
+            reject(new Error('Invalid input type. Expected a file object or file path.'));
+        }
+    });
+}
 
     /*
     ---------------------------------------------------------------------------------------
@@ -262,57 +424,58 @@ $(document).ready(function()
       $("#changeevent").val(card.event);
       $("#changeplace").val(card.place);
       $("#cardid").val(card.id);
-      // Assuming you have an image element in the modal
-      $("#changeimage").attr("src", card.imageUrl); // Update the image source
-
       // Show the modal
       $('#editCardModal').modal('show');
   }
 
     // Event listener To Store changes of card
     $("#editCardModal").submit(async function(event) {
-
-        event.preventDefault(); 
-
-        // Retrieve the updated values from the modal
-        var updatedTitle = $("#changetitle").val();
-        var updatedDescription = $("#changedescription").val();
-        var updatedDate = $("#changedate").val();
-        var updatedTime = $("#changetime").val();
-        var updatedEvent = $("#changeevent").val();
-        var updatedPlace = $("#changeplace").val();
-        // Retrieve card ID from hidden input field
-        var cardId = $("#cardid").val(); 
-
-        // Retrieve the matching card from local storage
-        var cards = JSON.parse(localStorage.getItem('cards')) || [];
-
-        var cardIndex = cards.findIndex(function(card) {
-            return card.id == cardId;
-        });
-
-        // Update card if found
-        if (cardIndex !== -1) {
-
-            cards[cardIndex].title = updatedTitle;
-            cards[cardIndex].description = updatedDescription;
-            cards[cardIndex].date = updatedDate;
-            cards[cardIndex].time = updatedTime;
-            cards[cardIndex].event = updatedEvent;
-            cards[cardIndex].place = updatedPlace;
-
-            // Update the card in local storage
-            localStorage.setItem('cards', JSON.stringify(cards));
-
-            // Update the card's UI
-            $("#cardList").empty();
-            // Reload cards
-            loadCardsFromLocalStorage();
-
-        } else {
-            console.error('Card not found.');
-        }
-    });
+      event.preventDefault(); 
+      console.log("Helloo2");
+      // Retrieve the updated values from the modal
+      var updatedTitle = $("#changetitle").val();
+      var updatedDescription = $("#changedescription").val();
+      var updatedDate = $("#changedate").val();
+      var updatedTime = $("#changetime").val();
+      var updatedEvent = $("#changeevent").val();
+      var updatedPlace = $("#changeplace").val();
+      var updatedImage = $("#changeimage").prop('files')[0]; 
+  
+      // Retrieve card ID from hidden input field
+      var cardId = $("#cardid").val(); 
+  
+      // Retrieve the matching card from local storage
+      var cards = JSON.parse(localStorage.getItem('cards')) || [];
+  
+      var cardIndex = cards.findIndex(function(card) {
+          return card.id == cardId;
+      });
+  
+      // Update card if found
+      if (cardIndex !== -1) {
+          cards[cardIndex].title = updatedTitle;
+          cards[cardIndex].description = updatedDescription;
+          cards[cardIndex].date = updatedDate;
+          cards[cardIndex].time = updatedTime;
+          cards[cardIndex].event = updatedEvent;
+          cards[cardIndex].place = updatedPlace;
+          if(updatedImage){
+            var imageUrl= await getImageAsBase64(updatedImage);
+            cards[cardIndex].imageUrl = imageUrl;
+          }
+          
+  
+          // Update the card in local storage
+          localStorage.setItem('cards', JSON.stringify(cards));
+  
+          // Update the card's UI
+          $("#cardList").empty();
+          // Reload cards
+          loadCardsFromLocalStorage();
+      } else {
+          console.error('Card not found.');
+      }
+  });
 
 
 
